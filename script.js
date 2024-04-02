@@ -32,37 +32,46 @@ $(document).ready(() => {
       $.each(countries, (index, country) => {
           let countryHtml = 
           `<a href="details.html?country=${encodeURIComponent(country.name.common)}" class="country scale-effect" data-country-name="${country.name.common}">
-             <div class="country-flag">
-                   <img src="${country.flags.png}" alt="${country.name.common} Flag" />
-               </div>
+              <div class="country-flag">
+                  <img src="${country.flags.png}" alt="${country.name.common} Flag" />
+              </div>
               <div class="country-info">
                   <h2 class="country-title">${country.name.common}</h2>
-                     <ul class="country-brief">
-                          <li><strong>Population: </strong>${country.population}</li>
-                         <li><strong>Region: </strong>${country.region}</li>
-                          <li><strong>Capital: </strong>${country.capital}</li>
-                      </ul>
-             </div>
-           </a>`;
+                  <ul class="country-brief">
+                      <li><strong>Population: </strong>${country.population}</li>
+                      <li><strong>Region: </strong>${country.region}</li>
+                      <li><strong>Capital: </strong>${country.capital}</li>
+                  </ul>
+              </div>
+          </a>`;
 
           countriesHtml += countryHtml;
       });
       $("#countriesGrid").html(countriesHtml);
   };
 
-  $(document).on('click', '.country', function(event) {
-    event.preventDefault(); 
-    const countryName = $(this).data('country-name');
-    window.location.href = `details.html?country=${encodeURIComponent(countryName)}`; 
-});
+  const fetchCountryDetails = (countryName) => {
+      const apiUrl = `https://restcountries.com/v3.1/name/${countryName}`;
+      $.ajax({
+          url: apiUrl,
+          type: "GET",
+          success: (data) => {
+              const country = data[0]; // Assuming the first result is the correct country
+              displayCountryDetails(country);
+          },
+          error: () => {
+              displayError();
+          }
+      });
+  };
 
   const displayCountryDetails = (country) => {
       const countryDetailsHtml =
-      ` <h2>${country.name.common}</h2>
-          <img src="${country.flags.png}" alt="${country.name.common} Flag" />
-          <p>Population: ${country.population}</p>
-          <p>Region: ${country.region}</p>
-          <p>Capital: ${country.capital}</p>`;
+      `<h2>${country.name.common}</h2>
+      <img src="${country.flags.png}" alt="${country.name.common} Flag" />
+      <p>Population: ${country.population}</p>
+      <p>Region: ${country.region}</p>
+      <p>Capital: ${country.capital}</p>`;
       $(".country-details").html(countryDetailsHtml);
   };
 
@@ -86,7 +95,6 @@ $(document).ready(() => {
       getCountries(apiUrl);
   });
 
-
   const countryName = getQueryParam("country");
 
   if (countryName) {
@@ -97,4 +105,9 @@ $(document).ready(() => {
 
   $('.search-input').on('input', filterCountries);
 
+  $(document).on('click', '.country', function(event) {
+      event.preventDefault(); 
+      const countryName = $(this).data('country-name');
+      window.location.href = `details.html?country=${encodeURIComponent(countryName)}`; 
+  });
 });
